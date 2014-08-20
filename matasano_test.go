@@ -32,3 +32,9 @@ func TestXOR(t *testing.T) {
 		t.Error("xor_result does not match expected_xor_result!")
 	}
 }
+
+//func TestXORFindSingleCharKey(t *testing.T) {
+//	hex_input := "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
+//
+//	fmt.Printf("%w\n", hex.DecodeString(hex_input))
+//}

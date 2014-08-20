@@ -9,9 +9,7 @@ func HexToBase64(hex_input string) string {
 
 	bytes, _ := hex.DecodeString(hex_input)
 
-	base64_output := base64.StdEncoding.EncodeToString(bytes)
-
-	return base64_output
+	return base64.StdEncoding.EncodeToString(bytes)
 }
 
 func XOR(bytes_a, bytes_b []byte) []byte {
@@ -19,9 +17,7 @@ func XOR(bytes_a, bytes_b []byte) []byte {
 	var xor_result []byte
 
 	for i, b := range bytes_a {
-		xored_byte := b ^ bytes_b[i]
-
-		xor_result = append(xor_result, xored_byte)
+		xor_result = append(xor_result, b^bytes_b[i])
 	}
 
 	return xor_result
