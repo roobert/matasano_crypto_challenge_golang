@@ -2,6 +2,7 @@ package matasano
 
 import (
 	"encoding/hex"
+	"strings"
 	"testing"
 )
 
@@ -29,12 +30,25 @@ func TestXOR(t *testing.T) {
 	hex_xor_result := hex.EncodeToString(xor_result)
 
 	if hex_xor_result != hex_expected_xor_result {
-		t.Error("xor_result does not match expected_xor_result!")
+		t.Error("xor result does not match expected xor result")
 	}
 }
 
-//func TestXORFindSingleCharKey(t *testing.T) {
-//	hex_input := "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
-//
-//	fmt.Printf("%w\n", hex.DecodeString(hex_input))
-//}
+func TestXORFindSingleCharKey(t *testing.T) {
+
+	inputMessage := "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
+
+	expectedMessage := "Cooking MC's like a pound of bacon"
+
+	rawMessage, _ := hex.DecodeString(inputMessage)
+
+	foundKeyChar := XORFindSingleCharKey(rawMessage)
+
+	probableKey := strings.Repeat(string(foundKeyChar), len(inputMessage)/2)
+
+	decryptedMessage := XOR([]byte(probableKey), rawMessage)
+
+	if string(decryptedMessage) != expectedMessage {
+		t.Error("decrypted message doesn't match expected message")
+	}
+}
