@@ -8,14 +8,12 @@ import (
 )
 
 func HexToBase64(hex_input string) string {
-
 	bytes, _ := hex.DecodeString(hex_input)
 
 	return base64.StdEncoding.EncodeToString(bytes)
 }
 
 func XOR(bytes_a, bytes_b []byte) []byte {
-
 	xor_result := make([]byte, len(bytes_a))
 
 	for i, b := range bytes_a {
@@ -26,9 +24,6 @@ func XOR(bytes_a, bytes_b []byte) []byte {
 }
 
 func XORFindSingleCharKey(message []byte) byte {
-
-	keySize := len(message)
-
 	charFrequency := map[string]float32{
 		"a": 11.602, "b": 4.702, "c": 3.511,
 		"d": 2.670, "e": 2.000, "f": 3.779,
@@ -62,8 +57,9 @@ func XORFindSingleCharKey(message []byte) byte {
 	}
 
 	// iterate through possible keys and calculate score for each key
-	for b := range charScore {
+	keySize := len(message)
 
+	for b := range charScore {
 		key := strings.Repeat(string(b), keySize)
 
 		messageBytes := XOR([]byte(key), message)
@@ -79,6 +75,8 @@ func XORFindSingleCharKey(message []byte) byte {
 
 		fmt.Printf("%s: %v\n", string(b), score)
 	}
+
+	// find highest value in map
 
 	highestScore := float32(0)
 	var foundKeyChar byte
