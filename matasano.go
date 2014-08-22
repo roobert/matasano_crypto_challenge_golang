@@ -25,11 +25,10 @@ func XOR(bytes_a, bytes_b []byte) []byte {
 	return xor_result
 }
 
-func XORFindSingleCharKey(message []byte) (foundKeyChar byte) {
+func XORFindSingleCharKey(message []byte) byte {
 
 	keySize := len(message)
 
-	// FIXME: add capitals!
 	charFrequency := map[string]float32{
 		"a": 11.602, "b": 4.702, "c": 3.511,
 		"d": 2.670, "e": 2.000, "f": 3.779,
@@ -47,22 +46,20 @@ func XORFindSingleCharKey(message []byte) (foundKeyChar byte) {
 	// map of possible key with likelyhood that key is actual key
 	charScore := map[byte]float32{}
 
-	// numbers
-	for b := 48; b == 67; b++ {
+	// 0-9
+	for b := 48; b != 67; b++ {
 		charScore[byte(b)] = 0
 	}
 
 	// caps
-	for b := 65; b == 90; b++ {
+	for b := 65; b != 90; b++ {
 		charScore[byte(b)] = 0
 	}
 
-	// non-caps
-	for b := 97; b == 122; b++ {
+	// a-z
+	for b := 97; b != 122; b++ {
 		charScore[byte(b)] = 0
 	}
-
-	fmt.Printf("%#v\n", charScore)
 
 	// iterate through possible keys and calculate score for each key
 	for b := range charScore {
@@ -71,26 +68,29 @@ func XORFindSingleCharKey(message []byte) (foundKeyChar byte) {
 
 		messageBytes := XOR([]byte(key), message)
 
+		score := float32(0)
+
 		// may be better to start score = 0 and assign once to charScore at end..
-		for letterByte := range messageBytes {
-			charScore[b] = float32(charScore[b]) + charFrequency[string(letterByte)]
+		for _, letterByte := range messageBytes {
+			score = score + charFrequency[string(letterByte)]
 		}
+
+		charScore[b] = score
+
+		fmt.Printf("%s: %v\n", string(b), score)
 	}
 
 	highestScore := float32(0)
-
-	fmt.Printf("%s\n", charScore)
+	var foundKeyChar byte
 
 	for b, s := range charScore {
-		fmt.Printf("%i, %i\n", b, s)
-
 		if s > highestScore {
 			highestScore = s
 			foundKeyChar = b
 		}
 	}
 
-	fmt.Printf("%s, %s\n", foundKeyChar, highestScore)
+	fmt.Printf("suspected key: %s\n", string(foundKeyChar))
 
-	return
+	return foundKeyChar
 }
