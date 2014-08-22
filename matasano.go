@@ -92,3 +92,12 @@ func XORFindSingleCharKey(message []byte) byte {
 
 	return foundKeyChar
 }
+
+func DetectSingleCharacterXOR(message []byte) []byte {
+
+	// for each line, find single char xor key
+
+	var foundMessage []byte
+
+	return foundMessage
+}

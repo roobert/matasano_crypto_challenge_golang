@@ -2,6 +2,7 @@ package matasano
 
 import (
 	"encoding/hex"
+	"io/ioutil"
 	"strings"
 	"testing"
 )
@@ -49,5 +50,24 @@ func TestXORFindSingleCharKey(t *testing.T) {
 
 	if string(decryptedMessage) != expectedMessage {
 		t.Error("decrypted message doesn't match expected message")
+	}
+}
+
+func TestDetectSingleCharacterXOR(t *testing.T) {
+
+	t.Skip("skip incomplete function")
+
+	text, err := ioutil.ReadFile(string("data/4/gistfile1.txt"))
+
+	if err != nil {
+		t.Error("error reading data file")
+	}
+
+	expected_message := "Now that the party is jumping\n"
+
+	foundMessage := DetectSingleCharacterXOR(text)
+
+	if string(foundMessage) != expected_message {
+		t.Error("found message doesn't match expected message")
 	}
 }
