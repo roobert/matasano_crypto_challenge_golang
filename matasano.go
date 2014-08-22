@@ -3,6 +3,7 @@ package matasano
 import (
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
 	"strings"
 )
 
@@ -15,10 +16,10 @@ func HexToBase64(hex_input string) string {
 
 func XOR(bytes_a, bytes_b []byte) []byte {
 
-	var xor_result []byte
+	xor_result := make([]byte, len(bytes_a))
 
 	for i, b := range bytes_a {
-		xor_result = append(xor_result, b^bytes_b[i])
+		xor_result[i] = b ^ bytes_b[i]
 	}
 
 	return xor_result
@@ -43,30 +44,53 @@ func XORFindSingleCharKey(message []byte) (foundKeyChar byte) {
 		"\\": 0.500, "?": 0.500,
 	}
 
-	// FIXME: add this
-	// 48..67 (numbers)
-	// 65..90 (caps)
-	// 97..122 (normal)
-	// prospectiveKeyChars :=
-
+	// map of possible key with likelyhood that key is actual key
 	charScore := map[byte]float32{}
 
-	// FIXME: use: range prospectiveKeyChars..
-	for i := 48; i >= 67; i++ {
+	// numbers
+	for b := 48; b == 67; b++ {
+		charScore[byte(b)] = 0
+	}
 
-		key := strings.Repeat(string(i), keySize)
+	// caps
+	for b := 65; b == 90; b++ {
+		charScore[byte(b)] = 0
+	}
+
+	// non-caps
+	for b := 97; b == 122; b++ {
+		charScore[byte(b)] = 0
+	}
+
+	fmt.Printf("%#v\n", charScore)
+
+	// iterate through possible keys and calculate score for each key
+	for b := range charScore {
+
+		key := strings.Repeat(string(b), keySize)
 
 		messageBytes := XOR([]byte(key), message)
 
 		// may be better to start score = 0 and assign once to charScore at end..
 		for letterByte := range messageBytes {
-			// FIXME: is this slow? does this work?
-			charScore[byte(i)] = charScore[byte(i)] + charFrequency[string(letterByte)]
+			charScore[b] = float32(charScore[b]) + charFrequency[string(letterByte)]
 		}
 	}
 
-	// FIXME: find highest rated
-	// foundKeyChar :=
+	highestScore := float32(0)
+
+	fmt.Printf("%s\n", charScore)
+
+	for b, s := range charScore {
+		fmt.Printf("%i, %i\n", b, s)
+
+		if s > highestScore {
+			highestScore = s
+			foundKeyChar = b
+		}
+	}
+
+	fmt.Printf("%s, %s\n", foundKeyChar, highestScore)
 
 	return
 }
