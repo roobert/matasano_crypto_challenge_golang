@@ -50,9 +50,9 @@ func TestXORFindSingleCharKey(t *testing.T) {
 func TestDetectSingleCharacterXOR(t *testing.T) {
 	expectedMessage := "Now that the party is jumping\n"
 
-	foundMessage := DetectSingleCharacterXOR("data/4/gistfile1.txt")
+	charData := DetectSingleCharacterXOR("data/4/gistfile1.txt")
 
-	if string(foundMessage) != expectedMessage {
+	if string(charData.decodedMessage) != expectedMessage {
 		t.Error("found message doesn't match expected message")
 	}
 }

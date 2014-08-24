@@ -98,7 +98,7 @@ func XORFindSingleCharKey(message []byte) charData {
 	return foundChar
 }
 
-func DetectSingleCharacterXOR(fileName string) []byte {
+func DetectSingleCharacterXOR(fileName string) charData {
 
 	// open file
 	file, err := os.Open(fileName)
@@ -125,7 +125,7 @@ func DetectSingleCharacterXOR(fileName string) []byte {
 		log.Fatal(err)
 	}
 
-	// find message with highest score overall score
+	// find message with highest scoring decoded message
 	highestScore := float32(0)
 	var highestScoringChar charData
 
@@ -136,5 +136,5 @@ func DetectSingleCharacterXOR(fileName string) []byte {
 		}
 	}
 
-	return highestScoringChar.decodedMessage
+	return highestScoringChar
 }
