@@ -2,35 +2,33 @@ package matasano
 
 import (
 	"encoding/hex"
-	"io/ioutil"
-	"strings"
 	"testing"
 )
 
 func TestHexToBase64(t *testing.T) {
-	hex_input := "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
-	expected_base64_output := "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t"
+	hexInput := "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
+	expectedBase64Output := "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t"
 
-	base64_output := HexToBase64(hex_input)
+	base64Output := HexToBase64(hexInput)
 
-	if base64_output != expected_base64_output {
-		t.Error("base64_output does not match expected output!")
+	if base64Output != expectedBase64Output {
+		t.Error("base64 output does not match expected output!")
 	}
 }
 
 func TestXOR(t *testing.T) {
-	hex_input_a := "1c0111001f010100061a024b53535009181c"
-	hex_input_b := "686974207468652062756c6c277320657965"
+	hexInputA := "1c0111001f010100061a024b53535009181c"
+	hexInputB := "686974207468652062756c6c277320657965"
 
-	hex_expected_xor_result := "746865206b696420646f6e277420706c6179"
+	hexExpectedXORResult := "746865206b696420646f6e277420706c6179"
 
-	bytes_a, _ := hex.DecodeString(hex_input_a)
-	bytes_b, _ := hex.DecodeString(hex_input_b)
+	bytesA, _ := hex.DecodeString(hexInputA)
+	bytesB, _ := hex.DecodeString(hexInputB)
 
-	xor_result := XOR(bytes_a, bytes_b)
-	hex_xor_result := hex.EncodeToString(xor_result)
+	XORResult := XOR(bytesA, bytesB)
+	hexXORResult := hex.EncodeToString(XORResult)
 
-	if hex_xor_result != hex_expected_xor_result {
+	if hexXORResult != hexExpectedXORResult {
 		t.Error("xor result does not match expected xor result")
 	}
 }
@@ -42,32 +40,20 @@ func TestXORFindSingleCharKey(t *testing.T) {
 
 	rawMessage, _ := hex.DecodeString(inputMessage)
 
-	foundKeyChar := XORFindSingleCharKey(rawMessage)
+	_, charData := XORFindSingleCharKey(rawMessage)
 
-	probableKey := strings.Repeat(string(foundKeyChar), len(inputMessage)/2)
-
-	decryptedMessage := XOR([]byte(probableKey), rawMessage)
-
-	if string(decryptedMessage) != expectedMessage {
+	if string(charData.decodedMessage) != expectedMessage {
 		t.Error("decrypted message doesn't match expected message")
 	}
 }
 
 func TestDetectSingleCharacterXOR(t *testing.T) {
 
-	t.Skip("skip incomplete function")
+	expectedMessage := "Now that the party is jumping\n"
 
-	text, err := ioutil.ReadFile(string("data/4/gistfile1.txt"))
+	foundMessage := DetectSingleCharacterXOR("data/4/gistfile1.txt")
 
-	if err != nil {
-		t.Error("error reading data file")
-	}
-
-	expected_message := "Now that the party is jumping\n"
-
-	foundMessage := DetectSingleCharacterXOR(text)
-
-	if string(foundMessage) != expected_message {
+	if string(foundMessage) != expectedMessage {
 		t.Error("found message doesn't match expected message")
 	}
 }

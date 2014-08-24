@@ -1,14 +1,17 @@
 package matasano
 
 import (
+	"bufio"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"log"
+	"os"
 	"strings"
 )
 
-func HexToBase64(hex_input string) string {
-	bytes, _ := hex.DecodeString(hex_input)
+func HexToBase64(hexInput string) string {
+	bytes, _ := hex.DecodeString(hexInput)
 
 	return base64.StdEncoding.EncodeToString(bytes)
 }
@@ -23,7 +26,13 @@ func XOR(bytes_a, bytes_b []byte) []byte {
 	return xor_result
 }
 
-func XORFindSingleCharKey(message []byte) byte {
+type charData struct {
+	score          float32
+	decodedMessage []byte
+	key            byte
+}
+
+func XORFindSingleCharKey(message []byte) (byte, charData) {
 	charFrequency := map[string]float32{
 		"a": 11.602, "b": 4.702, "c": 3.511,
 		"d": 2.670, "e": 2.000, "f": 3.779,
@@ -39,25 +48,27 @@ func XORFindSingleCharKey(message []byte) byte {
 	}
 
 	// map of possible key with likelyhood that key is actual key
-	charScore := map[byte]float32{}
+	charScore := map[byte]charData{}
 
 	// 0-9
 	for b := 48; b != 67; b++ {
-		charScore[byte(b)] = 0
+		charScore[byte(b)] = charData{}
 	}
 
 	// caps
 	for b := 65; b != 90; b++ {
-		charScore[byte(b)] = 0
+		charScore[byte(b)] = charData{}
 	}
 
 	// a-z
 	for b := 97; b != 122; b++ {
-		charScore[byte(b)] = 0
+		charScore[byte(b)] = charData{}
 	}
 
 	// iterate through possible keys and calculate score for each key
 	keySize := len(message)
+
+	fmt.Printf("char scores: ")
 
 	for b := range charScore {
 		key := strings.Repeat(string(b), keySize)
@@ -66,38 +77,77 @@ func XORFindSingleCharKey(message []byte) byte {
 
 		score := float32(0)
 
-		// may be better to start score = 0 and assign once to charScore at end..
 		for _, letterByte := range messageBytes {
 			score = score + charFrequency[string(letterByte)]
 		}
 
-		charScore[b] = score
+		charScore[b] = charData{score, messageBytes, b}
 
-		fmt.Printf("%s: %v\n", string(b), score)
+		fmt.Printf("[%s: %v] ", string(b), score)
 	}
 
-	// find highest value in map
+	fmt.Printf("\n")
 
+	// find highest value in map
 	highestScore := float32(0)
 	var foundKeyChar byte
 
-	for b, s := range charScore {
-		if s > highestScore {
-			highestScore = s
+	for b, data := range charScore {
+		if data.score > highestScore {
+			highestScore = data.score
 			foundKeyChar = b
 		}
 	}
 
-	fmt.Printf("suspected key: %s\n", string(foundKeyChar))
+	fmt.Printf("suspected key: %s, %s\n", string(foundKeyChar), charScore[foundKeyChar])
 
-	return foundKeyChar
+	return foundKeyChar, charScore[foundKeyChar]
 }
 
-func DetectSingleCharacterXOR(message []byte) []byte {
+func DetectSingleCharacterXOR(fileName string) []byte {
 
-	// for each line, find single char xor key
+	// open file
+	file, err := os.Open(fileName)
 
-	var foundMessage []byte
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer file.Close()
+
+	// for each line, find most likely key char
+	charScore := map[string]charData{}
+
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		hexMessage := scanner.Text()
+
+		fmt.Printf("\ndecoding: %s\n", hexMessage)
+
+		decodedMessage, _ := hex.DecodeString(hexMessage)
+
+		_, charData := XORFindSingleCharKey(decodedMessage)
+
+		charScore[hexMessage] = charData
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	// find message with highest score overall score
+	highestScore := float32(0)
+	var highestScoringMessage string
+
+	for message, data := range charScore {
+		if data.score > highestScore {
+			highestScore = data.score
+			highestScoringMessage = message
+		}
+	}
+
+	foundMessage := charScore[highestScoringMessage].decodedMessage
 
 	return foundMessage
 }
