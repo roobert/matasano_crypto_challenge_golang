@@ -88,10 +88,10 @@ func XORFindSingleCharKey(message []byte) charData {
 	highestScore := float32(0)
 	var foundChar charData
 
-	for charKey, data := range charScore {
+	for _, data := range charScore {
 		if data.score > highestScore {
 			highestScore = data.score
-			foundChar = charScore[charKey]
+			foundChar = data
 		}
 	}
 
