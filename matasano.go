@@ -138,3 +138,21 @@ func DetectSingleCharacterXOR(fileName string) charData {
 
 	return foundChar
 }
+
+func RepeatingXOREncrypt(key, message []byte) []byte {
+
+	repeatKey := make([]byte, len(message))
+	ki := 0
+
+	for i := 0; i != len(message); i++ {
+		repeatKey[i] = key[ki]
+
+		if ki == 2 {
+			ki = 0
+		} else {
+			ki++
+		}
+	}
+
+	return XOR(repeatKey, message)
+}
