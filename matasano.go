@@ -141,6 +141,7 @@ func DetectSingleCharacterXOR(fileName string) charData {
 
 func RepeatingXOREncrypt(key, message []byte) []byte {
 
+	// create a repeating key that's the same length as the message
 	repeatKey := make([]byte, len(message))
 	ki := 0
 
