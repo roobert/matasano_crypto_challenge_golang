@@ -125,16 +125,16 @@ func DetectSingleCharacterXOR(fileName string) charData {
 		log.Fatal(err)
 	}
 
-	// find message with highest scoring decoded message
+	// find message with associated decoded message that has the highest score
 	highestScore := float32(0)
-	var highestScoringChar charData
+	var foundChar charData
 
 	for _, data := range charScore {
 		if data.score > highestScore {
 			highestScore = data.score
-			highestScoringChar = data
+			foundChar = data
 		}
 	}
 
-	return highestScoringChar
+	return foundChar
 }
