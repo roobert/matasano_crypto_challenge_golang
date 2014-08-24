@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/base64"
 	"encoding/hex"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -32,7 +31,8 @@ type charData struct {
 	key            byte
 }
 
-func XORFindSingleCharKey(message []byte) (byte, charData) {
+func XORFindSingleCharKey(message []byte) charData {
+
 	charFrequency := map[string]float32{
 		"a": 11.602, "b": 4.702, "c": 3.511,
 		"d": 2.670, "e": 2.000, "f": 3.779,
@@ -47,11 +47,12 @@ func XORFindSingleCharKey(message []byte) (byte, charData) {
 		"\\": 0.500, "?": 0.500,
 	}
 
-	// map of possible key with likelyhood that key is actual key
+	// struct to contain data about each char and the likelyhood that
+	// each char is the actual key
 	charScore := map[byte]charData{}
 
 	// 0-9
-	for b := 48; b != 67; b++ {
+	for b := 48; b != 57; b++ {
 		charScore[byte(b)] = charData{}
 	}
 
@@ -65,43 +66,36 @@ func XORFindSingleCharKey(message []byte) (byte, charData) {
 		charScore[byte(b)] = charData{}
 	}
 
-	// iterate through possible keys and calculate score for each key
-	keySize := len(message)
+	// iterate through possible keys and calculate a score for each key
+	for charKey := range charScore {
 
-	fmt.Printf("char scores: ")
+		// key length matches message length
+		key := strings.Repeat(string(charKey), len(message))
 
-	for b := range charScore {
-		key := strings.Repeat(string(b), keySize)
-
-		messageBytes := XOR([]byte(key), message)
+		messageXOR := XOR([]byte(key), message)
 
 		score := float32(0)
 
-		for _, letterByte := range messageBytes {
-			score = score + charFrequency[string(letterByte)]
+		for _, char := range messageXOR {
+			score = score + charFrequency[string(char)]
 		}
 
-		charScore[b] = charData{score, messageBytes, b}
-
-		fmt.Printf("[%s: %v] ", string(b), score)
+		// store result for each key
+		charScore[charKey] = charData{score, messageXOR, charKey}
 	}
 
-	fmt.Printf("\n")
-
-	// find highest value in map
+	// find the key with associated decoded message that has highest score
 	highestScore := float32(0)
-	var foundKeyChar byte
+	var foundChar charData
 
-	for b, data := range charScore {
+	for charKey, data := range charScore {
 		if data.score > highestScore {
 			highestScore = data.score
-			foundKeyChar = b
+			foundChar = charScore[charKey]
 		}
 	}
 
-	fmt.Printf("suspected key: %s, %s\n", string(foundKeyChar), charScore[foundKeyChar])
-
-	return foundKeyChar, charScore[foundKeyChar]
+	return foundChar
 }
 
 func DetectSingleCharacterXOR(fileName string) []byte {
@@ -112,7 +106,6 @@ func DetectSingleCharacterXOR(fileName string) []byte {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	defer file.Close()
 
 	// for each line, find most likely key char
@@ -121,15 +114,11 @@ func DetectSingleCharacterXOR(fileName string) []byte {
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
-		hexMessage := scanner.Text()
+		decodedHexMessage, _ := hex.DecodeString(scanner.Text())
 
-		fmt.Printf("\ndecoding: %s\n", hexMessage)
+		charData := XORFindSingleCharKey(decodedHexMessage)
 
-		decodedMessage, _ := hex.DecodeString(hexMessage)
-
-		_, charData := XORFindSingleCharKey(decodedMessage)
-
-		charScore[hexMessage] = charData
+		charScore[scanner.Text()] = charData
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -138,16 +127,14 @@ func DetectSingleCharacterXOR(fileName string) []byte {
 
 	// find message with highest score overall score
 	highestScore := float32(0)
-	var highestScoringMessage string
+	var highestScoringChar charData
 
-	for message, data := range charScore {
+	for _, data := range charScore {
 		if data.score > highestScore {
 			highestScore = data.score
-			highestScoringMessage = message
+			highestScoringChar = data
 		}
 	}
 
-	foundMessage := charScore[highestScoringMessage].decodedMessage
-
-	return foundMessage
+	return highestScoringChar.decodedMessage
 }

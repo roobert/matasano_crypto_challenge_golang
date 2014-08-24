@@ -38,9 +38,9 @@ func TestXORFindSingleCharKey(t *testing.T) {
 
 	expectedMessage := "Cooking MC's like a pound of bacon"
 
-	rawMessage, _ := hex.DecodeString(inputMessage)
+	decodedInputMessage, _ := hex.DecodeString(inputMessage)
 
-	_, charData := XORFindSingleCharKey(rawMessage)
+	charData := XORFindSingleCharKey(decodedInputMessage)
 
 	if string(charData.decodedMessage) != expectedMessage {
 		t.Error("decrypted message doesn't match expected message")
@@ -48,7 +48,6 @@ func TestXORFindSingleCharKey(t *testing.T) {
 }
 
 func TestDetectSingleCharacterXOR(t *testing.T) {
-
 	expectedMessage := "Now that the party is jumping\n"
 
 	foundMessage := DetectSingleCharacterXOR("data/4/gistfile1.txt")
