@@ -49,6 +49,7 @@ func TestDetectSingleCharacterXOR(t *testing.T) {
 		t.Error("found message doesn't match expected message")
 	}
 }
+
 func TestRepeatingXOREncrypt(t *testing.T) {
 	message := "Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal"
 	key := "ICE"
@@ -58,5 +59,15 @@ func TestRepeatingXOREncrypt(t *testing.T) {
 
 	if hex.EncodeToString(encryptedMessage) != expectedEncryptedMessage {
 		t.Error("encrypted message doesn't match expected encrypted message")
+	}
+}
+
+// 1-6
+func TestHammingDistance(t *testing.T) {
+	a := "this is a test"
+	b := "wokka wokka!!!"
+
+	if hammingDistance([]byte(a), []byte(b)) != 37 {
+		t.Error("hamming distance did not match expected hamming distance")
 	}
 }

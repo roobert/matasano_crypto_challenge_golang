@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -84,7 +85,7 @@ func XORFindSingleCharKey(message []byte) charData {
 		charScore[charKey] = charData{score, messageXOR, charKey}
 	}
 
-	// find the key with associated decoded message that has highest score
+	// find the key with associated ecoded message that has highest score
 	highestScore := float32(0)
 	var foundChar charData
 
@@ -156,4 +157,20 @@ func RepeatingXOREncrypt(key, message []byte) []byte {
 	}
 
 	return XOR(repeatKey, message)
+}
+
+// hamming distance between two strings is the number of '1' bits
+// in the XOR'd values
+// with 0's removed
+func hammingDistance(a, b []byte) int {
+
+	var d int
+
+	for _, b := range XOR(a, b) {
+		s := strconv.FormatInt(int64(b), 2)
+		c := strings.Count(s, "1")
+		d = d + c
+	}
+
+	return d
 }
