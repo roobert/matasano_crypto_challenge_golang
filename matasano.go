@@ -161,16 +161,18 @@ func RepeatingXOREncrypt(key, message []byte) []byte {
 
 // hamming distance between two strings is the number of '1' bits
 // in the XOR'd values
-// with 0's removed
 func hammingDistance(a, b []byte) int {
 
 	var d int
 
-	for _, b := range XOR(a, b) {
-		s := strconv.FormatInt(int64(b), 2)
+	for _, l := range XOR(a, b) {
+		s := strconv.FormatInt(int64(l), 2)
 		c := strings.Count(s, "1")
 		d = d + c
 	}
 
 	return d
 }
+
+//func calculateKeySize(text, minKeySize, maxKeySize) int {
+//}

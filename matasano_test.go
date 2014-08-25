@@ -71,3 +71,11 @@ func TestHammingDistance(t *testing.T) {
 		t.Error("hamming distance did not match expected hamming distance")
 	}
 }
+
+func TestCalculateKeySize(t *testing.T) {
+	t.Skip()
+}
+
+func TestBreakRepeatingXOR(t *testing.T) {
+
+}
